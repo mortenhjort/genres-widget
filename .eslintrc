@@ -1,0 +1,38 @@
+{
+  "parser": "babel-eslint",
+  "parserOptions": {
+    "ecmaVersion": 8,
+    "ecmaFeatures": {
+      "experimentalObjectRestSpread": true,
+      "experimentalDecorators": true,
+      "jsx": true,
+      "modules": true
+    },
+    "sourceType": "module"
+  },
+  "env": {
+    "es6": true,
+    "node": true
+  },
+  "plugins": [
+    "react"
+  ],
+  "globals": {
+    "document": false,
+    "navigator": false,
+    "window": false,
+    "fetch": false,
+    "URL": false
+  },
+  "extends": [
+    "airbnb",
+    "eslint:recommended",
+    "plugin:react/recommended"
+  ],
+  "rules": {
+    "no-console": 0,
+    "import/prefer-default-export": 1,
+    "react/jsx-filename-extension": 0,
+    "react/forbid-prop-types": 0
+  }
+}

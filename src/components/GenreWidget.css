@@ -1,0 +1,60 @@
+.wrapper {
+  width: 100vw;
+  height: 100vh;
+}
+.genres {
+  width: 400px;
+  border: 1px solid #dbdbdb;
+  margin: 10px;
+}
+.genres__header,
+.genres__parent,
+.genres__item {
+  display: flex;
+  justify-content: space-between;
+  line-height: 32px;
+  padding: 4px 4px 4px 10px
+}
+.genres__item {
+  background: #f6f6f6;
+  font-size: 13px;
+}
+.genres__parent {
+  background: #ebebeb;
+}
+/* .genres__family {} */
+.genres__family--drop-hover {
+  border: 1px dashed gray;
+}
+.genres__caption {
+  margin: 0;
+  text-transform: capitalize;
+}
+.genres__btn {
+  text-align: center;
+  min-width: 24px;
+  height: 32px;
+  line-height: 32px;
+  border: none;
+  background: transparent;
+  outline: none !important;
+  cursor: pointer;
+  color: #999;
+  transition: color .3s;
+}
+.genres__btn:hover {
+  color: #444;
+}
+.genres__btn:disabled {
+  color: #bbb !important;
+  cursor: default;
+  pointer-events: none;
+}
+.genres__input {
+  border: none;
+  height: 20px;
+  width: 200px;
+  border-bottom: 1px solid #999;
+  background: transparent;
+  text-transform: capitalize;
+}
