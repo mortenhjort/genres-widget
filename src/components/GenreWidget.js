@@ -74,7 +74,6 @@ export default class GenreWidget extends Component {
   getInitialState() {
     return {
       tree: [],
-      genres: [],
       newGenre: null,
     };
   }
@@ -82,7 +81,6 @@ export default class GenreWidget extends Component {
     const { genres } = props.data;
 
     this.setState({
-      genres,
       tree: this.getTree(genres)
     });
   }
@@ -133,18 +131,18 @@ export default class GenreWidget extends Component {
     } });
     this.props.data.refetch();
   }
-  removeParent = (genre) => {
+  removeParent = async (genre) => {
     if (!genre.parent) return;
 
-    const newGenres = this.state.genres.map(item => {
-      if (item.id !== genre.id) return item;
-      const newGenre = { ...item };
-
-      delete newGenre.parent;
-      return newGenre;
+    await this.props.updateGenreMutation({
+      variables: {
+        genre: {
+          parent: null,
+        },
+        genreId: genre.id
+      }
     });
-
-    this.setState({ genres: newGenres, tree: this.getTree(newGenres) });
+    this.props.data.refetch();
   }
   removeGenre = async (genre) => {
     await this.props.removeGenreMutation({ variables: { genreId: genre.id } });
