@@ -19,6 +19,11 @@ import './GenreWidget.css';
         displayTitle
       }
     }
+    countries {
+      id
+      displayTitle
+      alpha2Code
+    }
   }
 `)
 @compose(
@@ -61,6 +66,7 @@ export default class GenreWidget extends Component {
     data: PropTypes.shape({
       loading: PropTypes.bool.isRequired,
       genres: PropTypes.array,
+      countries: PropTypes.array,
       refetch: PropTypes.func,
     }).isRequired,
     createGenreMutation: PropTypes.func.isRequired,
@@ -78,11 +84,14 @@ export default class GenreWidget extends Component {
     };
   }
   componentWillReceiveProps(props) {
+    console.log(props);
     const { genres } = props.data;
 
-    this.setState({
-      tree: this.getTree(genres)
-    });
+    if (genres) {
+      this.setState({
+        tree: this.getTree(genres)
+      });
+    }
   }
   getTree(_genres) {
     let tree = [];
@@ -152,7 +161,12 @@ export default class GenreWidget extends Component {
     this.setState({ newGenre: { id: `new_${Date.now()}`, displayTitle: 'new' } });
   }
   saveNewGenre = async (genre) => {
-    await this.props.createGenreMutation({ variables: { genre: { displayTitle: genre.displayTitle } } });
+    await this.props.createGenreMutation({ variables: {
+      genre: {
+        displayTitle: genre.displayTitle,
+        country: genre.country,
+      }
+    } });
     this.setState({ newGenre: null });
     this.props.data.refetch();
   }
@@ -168,7 +182,8 @@ export default class GenreWidget extends Component {
       removeGenre,
     } = this;
     const {
-      loading
+      loading,
+      countries,
     } = this.props.data;
 
     return (
@@ -197,6 +212,7 @@ export default class GenreWidget extends Component {
               changeParent={changeParent}
               removeParent={removeParent}
               removeGenre={removeGenre}
+              countries={countries}
             />
           )}
           {tree.map(item => (
@@ -208,6 +224,7 @@ export default class GenreWidget extends Component {
               changeParent={changeParent}
               removeParent={removeParent}
               removeGenre={removeGenre}
+              countries={countries}
             />
           ))}
         </div>

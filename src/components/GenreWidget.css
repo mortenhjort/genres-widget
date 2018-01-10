@@ -58,3 +58,29 @@
   background: transparent;
   text-transform: capitalize;
 }
+.genres__dropdown {
+  display: inline-block;
+  position: relative;
+  margin-left: -13px;
+}
+.genres__dropdown .Dropdown-control {
+  min-height: 13px;
+  padding-left: 13px;
+}
+.genres__dropdown .Dropdown-menu {
+  position: absolute;
+  top: 32px;
+  background: #ebebeb;
+  border: 1px solid #dbdbdb;
+  width: 200px;
+  z-index: 9999;
+  box-sizing: border-box;
+  padding: 4px;
+}
+.genres__dropdown .Dropdown-option {
+  padding: 2px;
+  transition: background-color .3s ease;
+}
+.genres__dropdown .Dropdown-option:hover {
+  background: rgba(0,0,0,.1);
+}

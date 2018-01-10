@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { DragSource } from 'react-dnd';
 import FontAwesome from 'react-fontawesome';
+import Dropdown from 'react-dropdown'
 import dropTypes from '../libs/dropTypes';
 
 const cardSource = {
@@ -26,6 +27,7 @@ export default class GenreItem extends Component {
     item: PropTypes.object.isRequired,
     isChild: PropTypes.bool,
     isParent: PropTypes.bool,
+    countries: PropTypes.array,
     applyChanges: PropTypes.func.isRequired,
     removeParent: PropTypes.func.isRequired,
     removeGenre: PropTypes.func.isRequired,
@@ -42,7 +44,20 @@ export default class GenreItem extends Component {
     return {
       editing: props.editing,
       displayTitle: this.props.item.displayTitle,
+      country: props.item.country && {
+        value: props.item.country.id,
+        label: props.item.country.displayTitle,
+      },
     };
+  }
+  componentWillReceiveProps(props) {
+    this.setState({
+      displayTitle: props.item.displayTitle,
+      country: props.item.country && {
+        value: props.item.country.id,
+        label: props.item.country.displayTitle,
+      },
+    });
   }
   startEdit = () => {
     this.setState({ editing: true });
@@ -53,8 +68,17 @@ export default class GenreItem extends Component {
   handleInput = (event) => {
     this.setState({ displayTitle: event.target.value });
   }
+  handleCountryDropdown = (item) => {
+    this.props.applyChanges({
+      ...this.props.item,
+      country: { id: item.value },
+    });
+  }
   applyChanges = () => {
-    this.props.applyChanges({ ...this.props.item, displayTitle: this.state.displayTitle });
+    this.props.applyChanges({
+      ...this.props.item,
+      displayTitle: this.state.displayTitle,
+    });
     this.setState({ editing: false });
   }
   removeParent = () => {
@@ -71,20 +95,24 @@ export default class GenreItem extends Component {
       connectDragSource,
       isChild,
       isParent,
-      item,
+      countries,
     } = this.props;
     const {
       editing,
       displayTitle,
+      country,
     } = this.state;
     const {
       startEdit,
       cancelEdit,
       handleInput,
+      handleCountryDropdown,
       applyChanges,
       removeParent,
       removeSelf,
     } = this;
+
+    const inputCountries = countries.map(item => ({ value: item.id, label: item.displayTitle }));
 
     return connectDragSource(
       <div
@@ -123,10 +151,16 @@ export default class GenreItem extends Component {
             </button>
           )}
           {(isChild || !isParent) && (
-            <button className="genres__btn">
+            <span className="genres__btn">
               <FontAwesome name="flag" />&nbsp;
-              {item.country && item.country.displayTitle}
-            </button>
+              <Dropdown
+                className="genres__dropdown"
+                options={inputCountries}
+                onChange={handleCountryDropdown}
+                value={country}
+                placeholder=" "
+              />
+            </span>
           )}
           {(isChild || !isParent) ? (
             <button className="genres__btn" onClick={removeSelf}>
