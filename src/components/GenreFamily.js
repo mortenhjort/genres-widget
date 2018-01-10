@@ -26,7 +26,7 @@ export default class GenreFamily extends Component {
 
     connectDropTarget: PropTypes.func.isRequired,
     dropHover: PropTypes.bool.isRequired,
-    dropItem: PropTypes.object.isRequired,
+    dropItem: PropTypes.object,
     didDrop: PropTypes.bool.isRequired,
   };
 

@@ -1,45 +1,90 @@
 import React, { Component } from 'react';
-import { graphql } from 'react-apollo';
+import { graphql, compose } from 'react-apollo';
 import FontAwesome from 'react-fontawesome';
 import gql from 'graphql-tag';
+import PropTypes from 'prop-types';
 import GenreFamily from './GenreFamily';
 import './GenreWidget.css';
 
-const genres = [
-  { id: '001', name: 'pop' },
-  { id: '002', name: 'rap' },
-  { id: '003', name: 'lounge' },
-  { id: '004', name: 'any pop', parent: '001' },
-  { id: '005', name: 'danish any pop', parent: '001', country: '001' },
-  { id: '006', name: 'lounge' },
-  { id: '007', name: 'lorem' },
-  { id: '008', name: 'ipsum' },
-  { id: '009', name: 'dolore' },
-  { id: '010', name: 'prosto' },
-  { id: '011', name: 'kakat' },
-  { id: '012', name: 'livan' },
-  { id: '013', name: 'root' },
-];
-
 @graphql(gql`
   query {
-    todos {
+    genres {
       id
-      text
+      displayTitle
+      parent {
+        id
+      }
+      country {
+        id
+        displayTitle
+      }
     }
   }
 `)
+@compose(
+  graphql(gql`
+    mutation($genre: GenreInput!) {
+      createGenre(genre: $genre) {
+        id
+        displayTitle
+        parent {
+          id
+        }
+        country {
+          id
+        }
+      }
+    }
+  `, { name: 'createGenreMutation' }),
+  graphql(gql`
+    mutation($genre: GenreInput!, $genreId: ID!) {
+      updateGenre(genre: $genre, genreId: $genreId) {
+        id
+        displayTitle
+        parent {
+          id
+        }
+        country {
+          id
+        }
+      }
+    }
+  `, { name: 'updateGenreMutation' }),
+  graphql(gql`
+    mutation($genreId: ID!) {
+      removeGenre(genreId: $genreId)
+    }
+  `, { name: 'removeGenreMutation' }),
+)
 export default class GenreWidget extends Component {
+  static propTypes = {
+    data: PropTypes.shape({
+      loading: PropTypes.bool.isRequired,
+      genres: PropTypes.array,
+      refetch: PropTypes.func,
+    }).isRequired,
+    createGenreMutation: PropTypes.func.isRequired,
+    updateGenreMutation: PropTypes.func.isRequired,
+    removeGenreMutation: PropTypes.func.isRequired,
+  }
   constructor(props) {
     super(props);
     this.state = this.getInitialState();
   }
   getInitialState() {
     return {
-      tree: this.getTree(genres),
-      genres,
+      tree: [],
+      genres: [],
       newGenre: null,
     };
+  }
+  componentWillReceiveProps(props) {
+    const { genres } = props.data;
+
+    this.setState({
+      genres,
+      tree: this.getTree(genres)
+    });
   }
   getTree(_genres) {
     let tree = [];
@@ -54,7 +99,7 @@ export default class GenreWidget extends Component {
       }
     });
     childGenres.forEach(childItem => {
-      const parent = tree.find(parentItem => parentItem.id === childItem.parent);
+      const parent = tree.find(parentItem => parentItem.id === childItem.parent.id);
 
       if (parent) {
         if (parent.children) {
@@ -67,17 +112,26 @@ export default class GenreWidget extends Component {
 
     return tree;
   }
-  applyGenreChanges = (genre) => {
-    const newGenres = this.state.genres.map(item => item.id === genre.id ? { ...item, name: genre.name } : item);
-
-    this.setState({ genres: newGenres, tree: this.getTree(newGenres) });
+  applyGenreChanges = async (genre) => {
+    await this.props.updateGenreMutation({ variables: {
+      genre: {
+        displayTitle: genre.displayTitle,
+        country: genre.country && genre.country.id,
+      },
+      genreId: genre.id
+    } });
+    this.props.data.refetch();
   }
-  changeParent = (newParent, child) => {
+  changeParent = async (newParent, child) => {
     if (newParent.parent) return;
 
-    const newGenres = this.state.genres.map(item => item.id === child.id ? { ...item, parent: newParent.id } : item);
-
-    this.setState({ genres: newGenres, tree: this.getTree(newGenres) });
+    await this.props.updateGenreMutation({ variables: {
+      genre: {
+        parent: newParent.id,
+      },
+      genreId: child.id
+    } });
+    this.props.data.refetch();
   }
   removeParent = (genre) => {
     if (!genre.parent) return;
@@ -92,18 +146,17 @@ export default class GenreWidget extends Component {
 
     this.setState({ genres: newGenres, tree: this.getTree(newGenres) });
   }
-  removeGenre = (genre) => {
-    const newGenres = this.state.genres.filter(item => item.id !== genre.id);
-
-    this.setState({ genres: newGenres, tree: this.getTree(newGenres) });
+  removeGenre = async (genre) => {
+    await this.props.removeGenreMutation({ variables: { genreId: genre.id } });
+    this.props.data.refetch();
   }
   editNewGenre = () => {
-    this.setState({ newGenre: { id: `new_${Date.now()}`, name: 'new' } });
+    this.setState({ newGenre: { id: `new_${Date.now()}`, displayTitle: 'new' } });
   }
-  saveNewGenre = (genre) => {
-    const newGenres = [genre, ...this.state.genres];
-
-    this.setState({ genres: newGenres, tree: this.getTree(newGenres), newGenre: null });
+  saveNewGenre = async (genre) => {
+    await this.props.createGenreMutation({ variables: { genre: { displayTitle: genre.displayTitle } } });
+    this.setState({ newGenre: null });
+    this.props.data.refetch();
   }
 
   render() {
@@ -116,6 +169,9 @@ export default class GenreWidget extends Component {
       removeParent,
       removeGenre,
     } = this;
+    const {
+      loading
+    } = this.props.data;
 
     return (
       <div className="wrapper">
@@ -125,9 +181,14 @@ export default class GenreWidget extends Component {
               Genres
             </h3>
             <div>
-              <button className="genres__btn">
-                <FontAwesome name="plus" onClick={editNewGenre} />
-              </button>
+              {loading
+                ? <span className="genres__btn">
+                  <FontAwesome name="spinner" spin />
+                </span>
+                : <button className="genres__btn" onClick={editNewGenre}>
+                  <FontAwesome name="plus" />
+                </button>
+              }
             </div>
           </div>
           {newGenre && (

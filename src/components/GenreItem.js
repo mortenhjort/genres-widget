@@ -41,20 +41,20 @@ export default class GenreItem extends Component {
   getInitialState(props) {
     return {
       editing: props.editing,
-      name: this.props.item.name,
+      displayTitle: this.props.item.displayTitle,
     };
   }
   startEdit = () => {
     this.setState({ editing: true });
   }
   cancelEdit = () => {
-    this.setState({ editing: false, name: this.props.item.name });
+    this.setState({ editing: false, displayTitle: this.props.item.displayTitle });
   }
   handleInput = (event) => {
-    this.setState({ name: event.target.value });
+    this.setState({ displayTitle: event.target.value });
   }
   applyChanges = () => {
-    this.props.applyChanges({ ...this.props.item, name: this.state.name });
+    this.props.applyChanges({ ...this.props.item, displayTitle: this.state.displayTitle });
     this.setState({ editing: false });
   }
   removeParent = () => {
@@ -71,10 +71,11 @@ export default class GenreItem extends Component {
       connectDragSource,
       isChild,
       isParent,
+      item,
     } = this.props;
     const {
       editing,
-      name,
+      displayTitle,
     } = this.state;
     const {
       startEdit,
@@ -95,7 +96,7 @@ export default class GenreItem extends Component {
           {
             editing ? (
               <span>
-                <input type="text" value={name} className="genres__input" onChange={handleInput} />
+                <input type="text" value={displayTitle} className="genres__input" onChange={handleInput} />
                 <button className="genres__btn" onClick={applyChanges}>
                   <FontAwesome name="check" style={{ color: '#56b563' }} />
                 </button>
@@ -110,7 +111,7 @@ export default class GenreItem extends Component {
                     <FontAwesome name="angle-left" style={{ color: '#999', marginRight: '6px' }} />
                   </button>
                 )}
-                {name}
+                {displayTitle}
               </span>
             )
           }
@@ -124,7 +125,7 @@ export default class GenreItem extends Component {
           {(isChild || !isParent) && (
             <button className="genres__btn">
               <FontAwesome name="flag" />&nbsp;
-              {/* {item.country.name} */}
+              {item.country && item.country.displayTitle}
             </button>
           )}
           {(isChild || !isParent) ? (
