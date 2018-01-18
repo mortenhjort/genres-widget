@@ -84,7 +84,6 @@ export default class GenreWidget extends Component {
     };
   }
   componentWillReceiveProps(props) {
-    console.log(props);
     const { genres } = props.data;
 
     if (genres) {
@@ -187,47 +186,45 @@ export default class GenreWidget extends Component {
     } = this.props.data;
 
     return (
-      <div className="wrapper">
-        <div className="genres">
-          <div className="genres__header">
-            <h3 className="genres__caption">
-              Genres
-            </h3>
-            <div>
-              {loading
-                ? <span className="genres__btn">
-                  <FontAwesome name="spinner" spin />
-                </span>
-                : <button className="genres__btn" onClick={editNewGenre}>
-                  <FontAwesome name="plus" />
-                </button>
-              }
-            </div>
+      <div className="genres">
+        <div className="genres__header">
+          <h3 className="genres__caption">
+            Genres
+          </h3>
+          <div>
+            {loading
+              ? <span className="genres__btn">
+                <FontAwesome name="spinner" spin />
+              </span>
+              : <button className="genres__btn" onClick={editNewGenre}>
+                <FontAwesome name="plus" />
+              </button>
+            }
           </div>
-          {newGenre && (
-            <GenreFamily
-              item={newGenre}
-              editing
-              applyChanges={saveNewGenre}
-              changeParent={changeParent}
-              removeParent={removeParent}
-              removeGenre={removeGenre}
-              countries={countries}
-            />
-          )}
-          {tree.map(item => (
-            <GenreFamily
-              key={item.id}
-              keyT={item.id}
-              item={item}
-              applyChanges={applyGenreChanges}
-              changeParent={changeParent}
-              removeParent={removeParent}
-              removeGenre={removeGenre}
-              countries={countries}
-            />
-          ))}
         </div>
+        {newGenre && (
+          <GenreFamily
+            item={newGenre}
+            editing
+            applyChanges={saveNewGenre}
+            changeParent={changeParent}
+            removeParent={removeParent}
+            removeGenre={removeGenre}
+            countries={countries}
+          />
+        )}
+        {tree.map(item => (
+          <GenreFamily
+            key={item.id}
+            keyT={item.id}
+            item={item}
+            applyChanges={applyGenreChanges}
+            changeParent={changeParent}
+            removeParent={removeParent}
+            removeGenre={removeGenre}
+            countries={countries}
+          />
+        ))}
       </div>
     );
   }
